@@ -6,7 +6,7 @@ void taskOne( void * parameter);
 void taskTwo( void * parameter);
 // void sensorValuePublishTask(void * parameter);
 void awsConnectionTask(void * parameter);
-// void motorControlTask(void * parameter);
+void motorControlTask(void * parameter);
 
 
 #define LED_BOARD 2 //change here the pin of the board to V2
@@ -53,13 +53,13 @@ void setup(){
                     2,                /* Priority of the task. */
                     NULL);            /* Task handle. */
 
-  // xTaskCreate(
-  //                   motorControlTask,          /* Task function. */
-  //                   "MotorControlTask",        /* String with name of task. */
-  //                   512,              /* Stack size in bytes. */
-  //                   NULL,             /* Parameter passed as input of the task */
-  //                   3,                /* Priority of the task. */
-  //                   NULL);            /* Task handle. */
+  xTaskCreate(
+                    motorControlTask,          /* Task function. */
+                    "MotorControlTask",        /* String with name of task. */
+                    4096,              /* Stack size in bytes. */
+                    NULL,             /* Parameter passed as input of the task */
+                    3,                /* Priority of the task. */
+                    NULL);            /* Task handle. */
 
 }
 
@@ -145,6 +145,13 @@ void awsConnectionTask(void * parameter)
 */
 void motorControlTask(void * parameter)
 {
-  
+  int16_t sensorValue = 10;
+  for(;;) {
+    Serial.println("publishing sensor value");
+    awsobject.publishMessage(sensorValue);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+  Serial.println("Task aws completed");
 
 }

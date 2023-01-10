@@ -105,7 +105,13 @@ void myawsclass::publishMessage(int16_t sensorValue) {
   char jsonBuffer[512];
   serializeJson(doc, jsonBuffer); /* print to client */
 
-  client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+  bool status = client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+  if (status) {
+    Serial.println("success");
+  }
+  else {
+    Serial.println("success");
+  }
 }
 
 myawsclass awsobject = myawsclass();  /* creating an object of class aws */
