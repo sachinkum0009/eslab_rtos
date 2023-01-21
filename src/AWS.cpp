@@ -32,6 +32,7 @@
 /* The MQTT topics that this device should publish/subscribe to */
 #define AWS_IOT_PUBLISH_TOPIC   "esp32/pub" 
 #define AWS_IOT_SUBSCRIBE_TOPIC "esp32/target"
+#define AWS_IOT_SUBSCRIBE_ROVER_TOPIC "esp32/rover"
 
 WiFiClientSecure net = WiFiClientSecure();
 MQTTClient client = MQTTClient(256);
@@ -40,13 +41,74 @@ myawsclass::myawsclass() {
 
 }
 
+// char* substr(const char* arr, int begin, int len) {
+//   char* res = new char[len+1];
+//   for (int i = 0; i < len; i++) {
+//     res[i] = *(arr+begin+i);
+//   }
+//   res[len]=0;
+//   return res;
+// }
+
+void extractTarget(const char* message, char* targetX, char* targetY) {
+
+    
+ uint16_t i = 0;
+  while(true) {
+  if (message[i] == '('){
+    i++;
+    uint8_t j = 0;
+    while(true) {
+      targetX[j] = *(message+i);
+      i++;
+      if (message[i] == ',') {
+        targetX[4] = '\0';
+        break;
+      }
+      j++;
+    }
+    i++;
+    j = 0;
+    while(true) {
+      targetY[j] = *(message+i);
+      i++;
+      if (message[i] == ')') {
+        targetY[4] = '\0';
+        break;
+      }
+      j++;
+    }
+    break;
+  }
+  i++;
+ }
+}
 
 void messageHandler(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
 
 //  StaticJsonDocument<200> doc;
 //  deserializeJson(doc, payload);
-//  const char* message = doc["message"];
+//  const char* message = doc["target"];
+// //  Serial.print("value");
+//  Serial.println(message);
+//  char* targetX = new char[3];
+//  char* targetY = new char[3];
+
+//  extractTarget(message, targetX, targetY);
+//  uint16_t targetXA = atoi(targetX);
+//  uint16_t targetYA = atoi(targetY);
+//  Serial.println(targetXA);
+//  Serial.println(targetYA);
+//  char* newMsg = substr(message, 1, 2);
+//  Serial.println(newMsg);
+ 
+//  char* newMsg2 = substr(message, 6, 7);
+//  Serial.println(newMsg2);
+}
+
+void messageHandlerRover(String &topic, String &payload) {
+
 }
 
 void myawsclass::stayConnected() {
@@ -56,7 +118,7 @@ void myawsclass::stayConnected() {
 void myawsclass::connectAWS() {
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFi.begin(WIFI_SSID, WPA2_AUTH_PEAP, EAP_ANONYMOUS_IDENTITY, EAP_IDENTITY, EAP_PASSWORD);
 
   Serial.println("Connecting to Wi-Fi");
 
@@ -93,6 +155,7 @@ void myawsclass::connectAWS() {
 
   /* Subscribe to a topic */
   client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
+  client.subscribe(AWS_IOT_SUBSCRIBE_ROVER_TOPIC);
 
   Serial.println("AWS IoT Connected!");
 }
@@ -106,12 +169,12 @@ void myawsclass::publishMessage(int16_t sensorValue) {
   serializeJson(doc, jsonBuffer); /* print to client */
 
   bool status = client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
-  if (status) {
-    Serial.println("success");
-  }
-  else {
-    Serial.println("success");
-  }
+  // if (status) {
+  //   Serial.println("success");
+  // }
+  // else {
+  //   Serial.println("success");
+  // }
 }
 
 myawsclass awsobject = myawsclass();  /* creating an object of class aws */
