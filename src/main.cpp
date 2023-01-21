@@ -48,18 +48,18 @@ void setup(){
   xTaskCreate(
                     awsConnectionTask,          /* Task function. */
                     "AwsConnectionTask",        /* String with name of task. */
-                    2048,              /* Stack size in bytes. */
+                    16384,              /* Stack size in bytes. */
                     NULL,             /* Parameter passed as input of the task */
                     2,                /* Priority of the task. */
                     NULL);            /* Task handle. */
 
-  xTaskCreate(
-                    motorControlTask,          /* Task function. */
-                    "MotorControlTask",        /* String with name of task. */
-                    4096,              /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    3,                /* Priority of the task. */
-                    NULL);            /* Task handle. */
+  // xTaskCreate(
+  //                   motorControlTask,          /* Task function. */
+  //                   "MotorControlTask",        /* String with name of task. */
+  //                   4096,              /* Stack size in bytes. */
+  //                   NULL,             /* Parameter passed as input of the task */
+  //                   3,                /* Priority of the task. */
+  //                   NULL);            /* Task handle. */
 
 }
 
@@ -133,7 +133,14 @@ void taskTwo( void * parameter)
 */
 void awsConnectionTask(void * parameter)
 {
-  awsobject.stayConnected();
+
+  Serial.println("connecting in loop");
+  for(;;) {
+    awsobject.stayConnected();
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+  Serial.println("end in loop");
+
   vTaskDelete(NULL);
   Serial.println("Task aws completed");
 }
@@ -147,7 +154,7 @@ void motorControlTask(void * parameter)
 {
   int16_t sensorValue = 10;
   for(;;) {
-    Serial.println("publishing sensor value");
+    // Serial.println("publishing sensor value");
     awsobject.publishMessage(sensorValue);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
