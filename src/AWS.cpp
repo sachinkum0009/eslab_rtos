@@ -28,11 +28,11 @@
 #include <ArduinoJson.h>
 #include "WiFi.h"
 #include "AWS.h"
+#include "motorDriver.h"
 
 /* The MQTT topics that this device should publish/subscribe to */
 #define AWS_IOT_PUBLISH_TOPIC   "esp32/pub" 
-#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/target"
-#define AWS_IOT_SUBSCRIBE_ROVER_TOPIC "esp32/rover"
+#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/cmd_vel"
 
 WiFiClientSecure net = WiFiClientSecure();
 MQTTClient client = MQTTClient(256);
@@ -86,29 +86,25 @@ void extractTarget(const char* message, char* targetX, char* targetY) {
 
 void messageHandler(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
+  
+  if (topic == "esp32/cmd_vel") {
+    StaticJsonDocument<200> doc;
+    deserializeJson(doc, payload);
+    const char* roverLinearChar  = doc["linear"]; // made changes here TODO
+    const char* roverAngularChar  = doc["angular"]; // made changes here TODO
+    // const char* message = doc["linear"]; // made changes here TODO
+    // char* roverLinearChar = new char[3];
+    // char* roverAngularChar  = new char[3];
+    // extractTarget(message, roverLinearChar, roverAngularChar);
+    int16_t roverLinear= atoi(roverLinearChar);
+    int16_t roverAngular= atoi(roverAngularChar);
+    // Serial.println(roverAngular);
+    motorobject.turnAngle(&roverAngular);
+    // Serial.println(roverLinear);
+    motorobject.moveRover(&roverLinear);
 
-//  StaticJsonDocument<200> doc;
-//  deserializeJson(doc, payload);
-//  const char* message = doc["target"];
-// //  Serial.print("value");
-//  Serial.println(message);
-//  char* targetX = new char[3];
-//  char* targetY = new char[3];
-
-//  extractTarget(message, targetX, targetY);
-//  uint16_t targetXA = atoi(targetX);
-//  uint16_t targetYA = atoi(targetY);
-//  Serial.println(targetXA);
-//  Serial.println(targetYA);
-//  char* newMsg = substr(message, 1, 2);
-//  Serial.println(newMsg);
- 
-//  char* newMsg2 = substr(message, 6, 7);
-//  Serial.println(newMsg2);
-}
-
-void messageHandlerRover(String &topic, String &payload) {
-
+     
+  }
 }
 
 void myawsclass::stayConnected() {
@@ -155,7 +151,6 @@ void myawsclass::connectAWS() {
 
   /* Subscribe to a topic */
   client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
-  client.subscribe(AWS_IOT_SUBSCRIBE_ROVER_TOPIC);
 
   Serial.println("AWS IoT Connected!");
 }

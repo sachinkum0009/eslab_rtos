@@ -1,25 +1,27 @@
 #include <Arduino.h>
 // #include <sensorDriver.h>
 #include <AWS.h>
+#include <motorDriver.h>
 
 void taskOne( void * parameter);
 void taskTwo( void * parameter);
 // void sensorValuePublishTask(void * parameter);
 void awsConnectionTask(void * parameter);
-void motorControlTask(void * parameter);
+void awsSubscriberTask(void * parameter);
+void motorTestingTask(void * parameter);
 
 
 #define LED_BOARD 2 //change here the pin of the board to V2
-// myawsclass* awsobjectPtr;
 
 void setup(){
   pinMode(LED_BOARD, OUTPUT);
   Serial.begin(9600);
   awsobject.connectAWS();
+  motorobject.SETUP();
   Serial.println("Serial started");
   delay(1000);
+  
   // awsobjectPtr = new myawsclass();  /* creating an object of class aws */
-
 
   // xTaskCreate(
   //                   taskOne,          /* Task function. */
@@ -53,14 +55,21 @@ void setup(){
                     2,                /* Priority of the task. */
                     NULL);            /* Task handle. */
 
-  // xTaskCreate(
-  //                   motorControlTask,          /* Task function. */
-  //                   "MotorControlTask",        /* String with name of task. */
-  //                   4096,              /* Stack size in bytes. */
-  //                   NULL,             /* Parameter passed as input of the task */
-  //                   3,                /* Priority of the task. */
-  //                   NULL);            /* Task handle. */
+  xTaskCreate(
+                    awsSubscriberTask,          /* Task function. */
+                    "AwsSubscriberTask",        /* String with name of task. */
+                    4096,              /* Stack size in bytes. */
+                    NULL,             /* Parameter passed as input of the task */
+                    3,                /* Priority of the task. */
+                    NULL);            /* Task handle. */
 
+//   xTaskCreate(
+//                     motorTestingTask,          /* Task function. */
+//                     "MotorTestingTask",        /* String with name of task. */
+//                     4096,              /* Stack size in bytes. */
+//                     NULL,             /* Parameter passed as input of the task */
+//                     3,                /* Priority of the task. */
+//                     NULL);            /* Task handle. */
 }
 
 void loop(){
@@ -150,7 +159,7 @@ void awsConnectionTask(void * parameter)
  * 
  * @brief this task responsible for controlling the motors
 */
-void motorControlTask(void * parameter)
+void awsSubscriberTask(void * parameter)
 {
   int16_t sensorValue = 10;
   for(;;) {
@@ -161,4 +170,14 @@ void motorControlTask(void * parameter)
   vTaskDelete(NULL);
   Serial.println("Task aws completed");
 
+}
+
+void motorTestingTask(void * parameter) {
+  Serial.println("turning");
+//   turn90Degree();
+    int16_t value = 5;
+  motorobject.moveRover(&value);
+
+  vTaskDelete(NULL);
+  Serial.println("Task aws completed");
 }

@@ -10,6 +10,8 @@
 
 #ifndef motor_h
 #define motor_h
+#define DELAY_TIME 0.0215 // 5714286
+#define DISTANCE_TIME 0.5
 
 enum Motors
 {
@@ -31,6 +33,8 @@ class mclass {
     void SPEED(int motor_speed);
     void motor_direction(Motors motor_ch, Direction dir); /* set direction of rotation of the motors */
     void set_speed(Motors motor_ch, Direction dir, int new_speed);  /* set the speed of the motors */
+    void turnAngle(const int16_t* angle);
+    void moveRover(const int16_t* distance);
 };
 
 extern mclass motorobject;

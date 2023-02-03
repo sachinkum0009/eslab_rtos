@@ -10,6 +10,7 @@
 
 #ifndef sensor_h
 #define sensor_h
+#include <ArduinoJson.h>
 
 class sclass {
   public:

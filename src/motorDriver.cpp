@@ -11,13 +11,13 @@
 
 static uint8_t inA1 = 16;           /* Pin for Motor 0 */
 static uint8_t inA2 = 17;           /* Pin for Motor 0 */
-static uint8_t inB1 = 19;           /* Pin for Motor 1 */
-static uint8_t inB2 = 33;           /* Pin for Motor 1 */
+static uint8_t inB1 = 13;           /* Pin for Motor 1 */
+static uint8_t inB2 = 4;           /* Pin for Motor 1 */
 static int freq = 20000;
 static uint8_t Channel1 = 0;
 static uint8_t Channel2 = 1;
 static uint8_t motorChannel1 = 5;   /* PWM Pin for Motor 0 */
-static uint8_t motorChannel2 = 18;  /* PWM Pin for Motor 0 */
+static uint8_t motorChannel2 = 15;  /* PWM Pin for Motor 0 */
 static uint8_t resolution = 8;
 
 
@@ -106,4 +106,25 @@ void mclass::set_speed(Motors motor_ch, Direction dir, int new_speed) {
   }
 }
 
+void mclass::moveRover(const int16_t* distance) {
+  motorobject.set_speed(MotorA, Forward, 225);
+  motorobject.set_speed(MotorB, Forward, 225);
+  vTaskDelay(*distance * DISTANCE_TIME * 1000/ portTICK_PERIOD_MS);
+  motorobject.set_speed(MotorA, Forward, 0);
+  motorobject.set_speed(MotorB, Forward, 0);
+}
+void mclass::turnAngle(const int16_t* angle) {
+  if(*angle < 0) {
+    motorobject.set_speed(MotorA, Backward, 225);
+    motorobject.set_speed(MotorB, Forward, 225);
+  }
+  else {
+    motorobject.set_speed(MotorA, Forward, 225);
+    motorobject.set_speed(MotorB, Backward, 225);
+  }
+  vTaskDelay(abs(*angle) * DELAY_TIME * 1000/ portTICK_PERIOD_MS);
+  motorobject.set_speed(MotorA, Forward, 0);
+  motorobject.set_speed(MotorB, Forward, 0);
+
+}
 mclass motorobject = mclass();  /* creating an object of class motor */
