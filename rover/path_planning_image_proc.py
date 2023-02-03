@@ -280,7 +280,11 @@ class CameraController(object):
             self.path_points = trajectory
             previous_point = self.rover_pose[5][0]
             i = 0
-
+            for point in self.path_points:
+                print('point', point)
+                cv2.circle(self.new_warped, (int(point[0]),int(point[1])), 10, (0, 255, 0), -1)
+            cv2.imshow("img warped", self.new_warped)
+            cv2.waitKey(0)
             # if not self.first_time:
             #     self.aws_object.send_cmd_vel(0.0, 90)
             #     self.first_time = True
@@ -294,7 +298,7 @@ class CameraController(object):
                 previous_point = path
                 i = i+1
                 # input("enter")
-                time.sleep(5)
+                time.sleep(3)
         else:
             print("not success")
         
@@ -384,6 +388,7 @@ class CameraController(object):
                                                                                 #in its equivalent position in the rectified ROI 																
             if self.targets_scenario:
                 warped,target_list, current_target_coordinate = self.myTargets.draw_current_target(warped) #draws the obstacle from the image scenario
+                self.new_warped = warped
                 self.rover_pose = my_rover_coordinates
                 print("rover pose", my_rover_coordinates)
                 print("target pose", current_target_coordinate)
@@ -394,7 +399,7 @@ class CameraController(object):
                 radius = 10
                     
                 # Red color in BGR
-                color = (0, 0, 255)
+                color = (0, 255, 0)
                     
                 # Line thickness of -1 px
                 thickness = -1
