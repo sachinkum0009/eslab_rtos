@@ -59,53 +59,6 @@ from enum import Enum
 myScenarioConfig=configureSystem.configureScenario() #use this object to apply the configurations 
                                                      #of the system in the configureSystem.py 
 
-
-class Vertice(object):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-class Edge(object):
-    def __init__(self, x1, y1, x2, y2):
-        self.start_vertice = Vertice(x1, y1)
-        self.stop_vertice = Vertice(x2, y2)
-
-
-
-class PathPlanning(object):
-    '''
-    pseudocode
-    RRT Pseudo Code
-    Qgoal //region that identifies success
-    Counter = 0 //keeps track of iterations
-    lim = n //number of iterations algorithm should run for
-    G(V,E) //Graph containing edges and vertices, initialized as empty
-    While counter < lim:
-        Xnew  = RandomPosition()
-        if IsInObstacle(Xnew) == True:
-            continue
-        Xnearest = Nearest(G(V,E),Xnew) //find nearest vertex
-        Link = Chain(Xnew,Xnearest)
-        G.append(Link)
-        if Xnew in Qgoal:
-            Return G
-    Return G
-    '''
-    def __init__(self, robot_position: list, target_position: list, obstacles: list):
-        self.start_pos = Vertice(robot_position[0], robot_position[1])
-        self.goal_pos = Vertice(target_position[0], target_position[1])
-        self.obstacles_list = list()
-        for obstacle in obstacles:
-            self.obstacles_list.append(Vertice(obstacle[0], obstacle[1]))
-        
-        pass
-
-    def find_trajectory(self):
-        pass
-
-
-
-
 class AWSCommunication(object):
     def __init__(self):
         myAWSConfig=configureSystem.configureAWS()													 
@@ -174,10 +127,7 @@ class AWSCommunication(object):
         print(message.topic)
         print("--------------\n\n")    
 
-class State(Enum):
-    IDLE = 1
-    MOVE = 2
-    
+
 
 class CameraController(object):
     def __init__(self, image_scenario, connect_to_aws, rover_id, game_mode):
@@ -185,7 +135,6 @@ class CameraController(object):
         self.aws_object = AWSCommunication()
         self.rover_id = rover_id
         self.connect_to_aws = connect_to_aws
-        self.current_state = State.IDLE
         self.rover_pose = []
 
         self.path_points = []
@@ -292,7 +241,7 @@ class CameraController(object):
             # input("enter")
             # self.current_angle = 0.0
             # self.current_angle = self.rover_pose[5][1]
-            self.current_angle = 270 - self.rover_pose[5][1]
+            self.current_angle = 0.0 #270 - self.rover_pose[5][1]
             for path in trajectory:
                 self.local_point_path(path, previous_point)
                 previous_point = path
@@ -304,8 +253,6 @@ class CameraController(object):
         
 
         
-        # self.current_state = State.MOVE
-    
     def update_rover_pos(self):
         img, _ = self.capture_image() #gets a clean capture of the scene (without border markers recognition)
         warped = tr.four_point_transform(img, self.pts) #cuts the ROI (region of interest) delimited by the
@@ -394,7 +341,7 @@ class CameraController(object):
                 print("target pose", current_target_coordinate)
                 start_pos = my_rover_coordinates
                 goal_pos = (current_target_coordinate)
-                self.find_path(start_pos[5][0], goal_pos, self.obstacles_scenario, 50, 200, 50)
+                self.find_path(start_pos[5][0], goal_pos, self.obstacles_scenario, 50, 500, 0)
                 # Radius of circle
                 radius = 10
                     
@@ -460,12 +407,7 @@ class CameraController(object):
     def run(self):
         self.find_border_markers()
         while True:
-            if self.current_state == State.IDLE:
-                self.find_rover_target_pos()
-                # self.test_forward_pixel()
-                # input("enter")
-        
-
+            self.find_rover_target_pos()
         self.cap.release()
         
         
